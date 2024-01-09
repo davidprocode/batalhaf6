@@ -12,10 +12,13 @@ export const handler: Handlers<Artist | null> = {
     return new Response(JSON.stringify(artists));
   },
   async POST(req, _ctx) {
-    const artist = (await req.json()) as Artist;
+    const url = new URL(req.url);
+    const name = url.searchParams.get("name") || "";
+    const newArtist: Artist = { name, id: String(crypto.randomUUID()) };
+    const artist = newArtist as Artist;
     const artistKey = ["artist", artist.id];
     const ok = await kv.atomic().set(artistKey, artist).commit();
     if (!ok) throw new Error("Something went wrong.");
-    return new Response(JSON.stringify(artist));
+    return new Response(JSON.stringify(newArtist));
   },
 };
